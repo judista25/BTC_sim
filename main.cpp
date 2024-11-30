@@ -31,12 +31,12 @@ void EvaluateBlock::Behavior()
     // std::cout << "Run time: " << Time << std::endl;
     // std::cout << "Start time: " << StartTime << std::endl;
     // std::cout << "End time: " << EndTime << std::endl;
-    // if (static_cast<long long>(Time * scale) + StartTime > EndTime)
-    // {
-    //     // should end either way
-    //     std::cout << "End time: " << EndTime << " Start time: " << StartTime << " result " << ((static_cast<long long>(Time)) + StartTime > EndTime) << std::endl;
-    //     Abort();
-    // }
+    if (static_cast<long long>(Time * scale) + StartTime > EndTime)
+    {
+        // should end either way
+        std::cout << "End time: " << EndTime << " Start time: " << StartTime << " result " << ((static_cast<long long>(Time)) + StartTime > EndTime) << std::endl;
+        Abort();
+    }
     long long realTime = (static_cast<long long>(Time * scale));
     // std::cout << "test time: " << realTime << std::endl;
     realTime += StartTime;
