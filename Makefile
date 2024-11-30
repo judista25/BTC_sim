@@ -20,14 +20,13 @@ CXXFLAGS += -I$(SIMLIB_DIR)
 
 # Main program
 main: main.cpp $(SIMLIB_DEPEND)
-	$(CXX) $(CXXFLAGS) -o main main.cpp $(SIMLIB_DIR)/simlib.so -lm
+	$(CXX) $(CXXFLAGS) -o main main.cpp $(SIMLIB_DIR)/simlib.so -lm  -Wall -pedantic
 
 plot: run
 	@./0-plot-all-ps.sh
 
 clean:
-	@echo "Deleting all executable examples..."
-	rm -f $(ALL_MODELS) gmon.out
+	rm -rf main
 
 clean-data:
 	@echo "Deleting all simulation results..."

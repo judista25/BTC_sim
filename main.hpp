@@ -8,9 +8,13 @@
 #include <map>
 #include <fstream>
 #include "nlohmann/json.hpp"
+#include <limits>
 
 class EvaluateBlock : public Event
 {
+    void Behavior();
+
+public:
     double hash_rate_miner;
     double hash_rate_network;
     double diff;
@@ -20,11 +24,10 @@ class EvaluateBlock : public Event
     std::map<long long, double> difficulty_history;
     std::map<long long, double> BTC_price_history;
     std::vector<double> reward_history;
+    Facility *hasher_miner;
+    Facility *hasher_network;
 
-    void Behavior();
-
-public:
-    EvaluateBlock(double hash_rate_miner, long long StartTime, long long EndTime, std::map<long long, double> hash_rates_history, std::map<long long, double> difficulty_history, std::map<long long, double> BTC_price_history, std::vector<double> reward_history);
+    EvaluateBlock(double hash_rate_miner, long long StartTime, long long EndTime, std::map<long long, double> hash_rates_history, std::map<long long, double> difficulty_history, std::map<long long, double> BTC_price_history, std::vector<double> reward_history, Facility *hasher_miner, Facility *hasher_network);
 };
 
 class MineProcess : public Process

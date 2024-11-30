@@ -53,6 +53,11 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "any": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "forward_list": "cpp",
+        "ratio": "cpp",
+        "valarray": "cpp"
     }
 }

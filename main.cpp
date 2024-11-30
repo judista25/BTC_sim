@@ -24,51 +24,45 @@ int max = 144;
 int counter = 0;
 const long long YEAR_MS = static_cast<long long>(YEAR) * 1000;
 
-EvaluateBlock::EvaluateBlock(double hash_rate_miner, long long StartTime, long long EndTime, std::map<long long, double> hash_rates_history, std::map<long long, double> difficulty_history, std::map<long long, double> BTC_price_history, std::vector<double> reward_history) : hash_rate_miner(hash_rate_miner), StartTime(StartTime), EndTime(EndTime), hash_rates_history(hash_rates_history), difficulty_history(difficulty_history), BTC_price_history(BTC_price_history), reward_history(reward_history) {}
+EvaluateBlock::EvaluateBlock(double hash_rate_miner, long long StartTime, long long EndTime, std::map<long long, double> hash_rates_history, std::map<long long, double> difficulty_history, std::map<long long, double> BTC_price_history, std::vector<double> reward_history, Facility *hasher_miner, Facility *hasher_network) : hash_rate_miner(hash_rate_miner), StartTime(StartTime), EndTime(EndTime), hash_rates_history(hash_rates_history), difficulty_history(difficulty_history), BTC_price_history(BTC_price_history), reward_history(reward_history), hasher_miner(hasher_miner), hasher_network(hasher_network) {}
 
 void EvaluateBlock::Behavior()
 {
-    // std::cout << "Run time: " << Time << std::endl;
-    // std::cout << "Start time: " << StartTime << std::endl;
-    // std::cout << "End time: " << EndTime << std::endl;
-    if (static_cast<long long>(Time * scale) + StartTime > EndTime)
-    {
-        // should end either way
-        std::cout << "End time: " << EndTime << " Start time: " << StartTime << " result " << ((static_cast<long long>(Time)) + StartTime > EndTime) << std::endl;
-        Abort();
-    }
     long long realTime = (static_cast<long long>(Time * scale));
-    // std::cout << "test time: " << realTime << std::endl;
     realTime += StartTime;
 
     auto index = realTime - ((realTime - StartData) % DIFF_TIME_DATA);
     auto rewardIndex = StartTime / YEAR_MS + 1970 - 2009;
     auto reward = reward_history[rewardIndex];
-    auto hash_rate_network = (((hash_rates_history[index] * 1e12) / scale) - static_cast<long long>(hash_rate_miner)) * 4.6154;
-    auto diff = difficulty_history[index] / scale * 3.68515;
+    auto hash_rate_network = (((hash_rates_history[index] * 1e12) / scale) - static_cast<long long>(hash_rate_miner));
+    auto diff = difficulty_history[index] / scale;
+    // double diff = 600 /hash_rate_network;
     STAT_proportion(hash_rate_network / diff);
 
-    std::cout << "hash rate network: " << hash_rate_network << std::endl;
-    std::cout << "diff: " << diff << std::endl;
-    std::cout << "Index: " << index << std::endl;
-    std::cout << "Reward: " << reward << std::endl;
-    std::cout << "Hash rate history size: " << hash_rates_history.size() << std::endl;
-    std::cout << "Hash rate network: " << hash_rate_network << std::endl;
-    std::cout << "Difficulty: " << diff << std::endl;
-    std::cout << "TIME: " << Time * scale << std::endl;
-    std::cout << (EndTime / 1000 - StartTime / 1000) << std::endl;
+    // std::cout << "hash rate network: " << hash_rate_network << std::endl;
+    // std::cout << "diff: " << diff << std::endl;
+    // std::cout << "Index: " << index << std::endl;
+    // std::cout << "Reward: " << reward << std::endl;
+    // std::cout << "Hash rate history size: " << hash_rates_history.size() << std::endl;
+    // std::cout << "Hash rate network: " << hash_rate_network << std::endl;
+    // std::cout << "Difficulty: " << diff << std::endl;
+    // std::cout << "TIME: " << Time * scale << std::endl;
+    // std::cout << (EndTime / 1000 - StartTime / 1000) << std::endl;
 
     double hash_rate_network_test = (4.4e20 / scale) - hash_rate_miner; // Real-world network hash rate (440 EH/s)
     double difficulty_test = 6.1e13 / scale;                            // Current Bitcoin difficulty (61 trillion)
     STAT_proportion_hash(hash_rate_network_test / hash_rate_network);
     STAT_proportion_diff(difficulty_test / diff);
 
-    int block_hash = int(Uniform(0, diff));
-    Facility *hasher_miner = new Facility("Hasher_miner");
-    Facility *hasher_network = new Facility("Hasher_network");
-    (new MineProcess(block_hash, hash_rate_miner, diff, hasher_miner, hasher_network, this))->Activate();
+    long modulo = static_cast<long>(diff);
+    long block_hash = static_cast<int>(Uniform(0, modulo));
+    // long block_hash = Random() * diff;
+
     (new MineProcess(block_hash, hash_rate_network, diff, hasher_network, hasher_miner, this))->Activate();
-    Passivate();
+    (new MineProcess(block_hash, hash_rate_miner, diff, hasher_miner, hasher_network, this))->Activate();
+
+    // Passivate();
+    // this->Cancel();
 
     // mining network
 }
@@ -76,8 +70,12 @@ MineProcess::MineProcess(int block_hash, double hash_rate, double diff, Facility
 // MineProcess
 void MineProcess::Behavior()
 {
+
     int count = 0;
-    long long start_hash = static_cast<long long>(Uniform(0, diff));
+    RandomSeed(std::time(nullptr));
+    long modulo = static_cast<long>(diff);
+    // long start_hash = static_cast<long>(Uniform(0, modulo));
+    // long start_hash = Random() * diff;
     double wait_time = 1.0 / (hash_rate);
 
     // std::cout << "Start mining: " << miner_me->Name() << " " << SIM_TIME_M << " " << wait_time << " " << Time << std::endl;
@@ -85,9 +83,10 @@ void MineProcess::Behavior()
 
     double StartTimeProcess = Time;
 
+    // std::cout << "seizing " << miner_me->Name() << std::endl;
+    Seize(*miner_me); // Exclusive access to hasher
     while (true)
     {
-
         if (miner_me->Name() == "Hasher_miner")
         {
             STAT_HASH_ATTEMPTS_MINER(1);
@@ -97,15 +96,11 @@ void MineProcess::Behavior()
             STAT_HASH_ATTEMPTS_NETWORK(1);
         }
 
-        Seize(*miner_me); // Exclusive access to hasher
-        Wait(wait_time);  // Adjusted mining rate
-        // std::cout << "Wait " << wait_time << std::endl;
-        // std::cout << "Prewait " << Time << std::endl;
-        // Activate(Time + wait_time);
-        // std::cout << "After " << Time << std::endl;
+        Wait(wait_time); // Adjusted mining rate
+        count++;
 
         // Probabilistic block-finding
-        if (start_hash == block_hash)
+        if (static_cast<long>(Uniform(0, modulo)) == 0)
         {
             if (miner_me->Name() == "Hasher_miner")
             {
@@ -115,23 +110,50 @@ void MineProcess::Behavior()
             {
                 STAT_WIN_NETWORK(count);
             }
-            std::cout << "Win " + miner_me->Name() << " wirh hash: " << start_hash << std::endl;
-            Release(*miner_me);
-            Seize(*miner_opponent, ServicePriority_t(1));
+
+            if (++counter % 500 == 0)
+                std::cout << "Win " + miner_me->Name() << " block count: " << counter << " Time: " << Time * scale << std::endl;
+
+            if (miner_opponent->In())
+            {
+                // std::cout << "Opponent " << miner_opponent->Name() << " canceled" << std::endl;
+                auto opponent = miner_opponent->In();
+                Seize(*miner_opponent, 1);
+                opponent->Cancel();
+                Release(*miner_opponent);
+                miner_opponent->Clear();
+
+                // std::cout << "ocupancy of opponent: " << miner_opponent->Name() << " " << (miner_opponent->Busy() ? "true" : "false") << std::endl;
+            }
+            else
+            {
+                std::cout << "No opponent" << std::endl;
+                Seize(*miner_opponent, 1);
+                exit(1);
+            }
+
             proccessTime((Time - StartTimeProcess) * scale);
 
+            // std::cout << "releasing " << miner_me->Name() << std::endl;
+            Release(*miner_me);
             (new WinProcess(mainProc, miner_me->Name()))->Activate();
-            return;
+            this->Cancel();
         }
         else
         {
             // std::cout << "Miss" << std::endl;
-            start_hash = (start_hash + 1) % int(diff);
-            // std::cout << "diff " << diff << std::endl;
-            // std::cout << "Miss " << start_hash << std::endl;
-            // start_hash = static_cast<long long>(Uniform(0, diff));
-            count++;
-            Release(*miner_me);
+            if (static_cast<long>(diff) < 0)
+            {
+                std::cout << "Invalid diff" << std::endl;
+                exit(1);
+            }
+            // start_hash = (start_hash + 1) % (modulo);
+            // if (start_hash < 0 || start_hash > diff)
+            // {
+            //     std::cout << "Invalid start hash" << std::endl;
+            //     exit(1);
+            // }
+            modulo--;
         }
     }
 }
@@ -139,19 +161,21 @@ void MineProcess::Behavior()
 WinProcess::WinProcess(EvaluateBlock *mainProc, std::string name) : mainProc(mainProc), name(name) {}
 void WinProcess::Behavior()
 {
-    // win
-    // TODO tie
-    counter++;
-
-    mainProc->Activate(); // Reactivate the main process to continue mining
+    // mainProc->Activate(); // Reactivate the main process to continue mining
+    (new EvaluateBlock(mainProc->hash_rate_miner, mainProc->StartTime, mainProc->EndTime, mainProc->hash_rates_history, mainProc->difficulty_history, mainProc->BTC_price_history, mainProc->reward_history, mainProc->hasher_miner, mainProc->hasher_network))->Activate();
+    mainProc->Cancel();
 }
 
 int main()
 {
-    long long endDate = 1732320000000;
     long long startDate = 1617926400000;
-    Init(0, (((endDate - StartData) / 1000 - (startDate - StartData) / 1000)) / scale);
-    RandomSeed(std::time(NULL));
+    long long endDate = startDate + ((DAY * 1000LL) * 365LL);
+    Init(0, (((endDate - startDate) / 1000)) / scale);
+    // std::cout << "Start date: " << startDate << std::endl;
+    // std::cout << "End date: " << endDate << std::endl;
+    // std::cout << "limit for init" << (((endDate - startDate) / 1000)) / scale << std::endl;
+    // std::cout << "Max long long: " << std::numeric_limits<long long>::max() << std::endl;
+    // return 0;
 
     double hash_rate_miner_s9 = 14e12;       // 14 TH/s (Antminer S9)
     double hash_rate_miner_s19_pro = 110e12; // 110 TH/s (Antminer S19 Pro)
@@ -203,7 +227,7 @@ int main()
         hash_rates_history[el["x"]] = el["y"];
         // std::cout << el["x"] << " " << el["y"] << ", ";
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
     for (auto &el : difficulty_history_json["difficulty"])
     {
         difficulty_history[el["x"]] = el["y"];
@@ -214,7 +238,11 @@ int main()
         BTC_price_history[el["x"]] = el["y"];
     }
 
-    (new EvaluateBlock(hash_rate_miner, startDate, endDate, hash_rates_history, difficulty_history, BTC_price_history, reward_history))->Activate();
+    Facility *hasher_miner = new Facility("Hasher_miner");
+    Facility *hasher_network = new Facility("Hasher_network");
+
+    (new EvaluateBlock(hash_rate_miner, startDate, endDate, hash_rates_history, difficulty_history, BTC_price_history, reward_history, hasher_miner, hasher_network))->Activate();
+
     Run();
     STAT_WIN_MINER.Output();
     STAT_WIN_NETWORK.Output();
