@@ -15,6 +15,7 @@ class EvaluateBlock : public Event
     void Behavior();
 
 public:
+    bool pool_mining;
     double hash_rate_miner;
     double hash_rate_network;
     double diff;
@@ -27,7 +28,7 @@ public:
     Facility *hasher_miner;
     Facility *hasher_network;
 
-    EvaluateBlock(double hash_rate_miner, long long StartTime, long long EndTime, std::map<long long, double> hash_rates_history, std::map<long long, double> difficulty_history, std::map<long long, double> BTC_price_history, std::vector<double> reward_history, Facility *hasher_miner, Facility *hasher_network);
+    EvaluateBlock(bool pool_mining, double hash_rate_miner, long long StartTime, long long EndTime, std::map<long long, double> hash_rates_history, std::map<long long, double> difficulty_history, std::map<long long, double> BTC_price_history, std::vector<double> reward_history, Facility *hasher_miner, Facility *hasher_network);
 };
 
 class MineProcess : public Process
@@ -36,12 +37,13 @@ class MineProcess : public Process
     double hash_rate;
     double diff;
     Facility *miner_me;
+    int reward;
     Facility *miner_opponent;
     EvaluateBlock *mainProc;
     void Behavior();
 
 public:
-    MineProcess(int block_hash, double hahs_rate, double diff, Facility *miner_me, Facility *miner_opponent, EvaluateBlock *mainProc);
+    MineProcess(int block_hash, double hahs_rate, double diff, Facility *miner_me, int reward, Facility *miner_opponent, EvaluateBlock *mainProc);
 };
 
 class WinProcess : public Process
