@@ -253,7 +253,7 @@ int main()
      * 212 TH/s
      * Energy consumption: 5 550 W
      */
-    double whatsminer_m56s = 212 * 1e12; // 212 TH/s
+    // double whatsminer_m56s = 212 * 1e12; // 212 TH/s
 
     /*
      * GeForce RTX 4090
@@ -261,26 +261,26 @@ int main()
      * Energy consumption: 280 W
      * Price: $2 709
      */
-    double rtx_4090 = 1.4 * 1e6; // 1.4 MH/s
+    // double rtx_4090 = 1.4 * 1e6; // 1.4 MH/s
 
-    // Pools
-    double foundrydigital = 0.3; // 250.46 EH/s
-    double antpool = 0.2;        // 172 EH/s
-    double binance = 0.062;      // 52.89 EH/s
+    // Pre-made Pools
+    // double foundrydigital = 0.3; // 250.46 EH/s
+    // double antpool = 0.2;        // 172 EH/s
+    // double binance = 0.062;      // 52.89 EH/s
 
     bool pool_mining = false;
     double hash_rate_miner = Antminer_S21_XP / (pool_mining ? 1 : scale);
 
     // for (size_t i = 0; i < 4; i++)
     // {
-        Facility *hasher_miner = new Facility("Hasher_miner");
-        Facility *hasher_network = new Facility("Hasher_network");
+    Facility *hasher_miner = new Facility("Hasher_miner");
+    Facility *hasher_network = new Facility("Hasher_network");
 
-        std::cout << "Simulation started" << std::endl;
-        (new EvaluateBlock(pool_mining, hash_rate_miner, startDate, endDate, hash_rates_history, difficulty_history, BTC_price_history, reward_history, hasher_miner, hasher_network))->Activate();
-        std::cout << "Simulation ended" << std::endl;
+    std::cout << "Simulation started" << std::endl;
+    (new EvaluateBlock(pool_mining, hash_rate_miner, startDate, endDate, hash_rates_history, difficulty_history, BTC_price_history, reward_history, hasher_miner, hasher_network))->Activate();
     // }
     Run();
+    std::cout << "Simulation ended" << std::endl;
 
     std::cout << "Miner reward: " << reward_miner << std::endl;
     STAT_WIN_MINER.Output();

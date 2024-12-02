@@ -10,7 +10,7 @@ $(SIMLIB_DIR)/simlib.so:
 
 CXXFLAGS += -I$(SIMLIB_DIR)
 
-main: main.cpp main.hpp $(SIMLIB_DEPEND)
+main: main main.cpp main.hpp $(SIMLIB_DEPEND)
 	$(CXX) $(CXXFLAGS) -o main main.cpp $(SIMLIB_DIR)/simlib.so -lm -Wall -pedantic
 
 .PHONY: clean run all
