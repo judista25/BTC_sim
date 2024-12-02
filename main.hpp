@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
-#include "nlohmann/json.hpp"
+#include "./include/json.hpp"
 #include <limits>
 
 class EvaluateBlock : public Event
