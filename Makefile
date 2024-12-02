@@ -7,7 +7,7 @@ SIMLIB_DEPEND3D=$(SIMLIB_DEPEND) $(SIMLIB_DIR)/simlib3D.h
 
 CXXFLAGS += -I$(SIMLIB_DIR)
 
-# dependencies:
+.PHONY: clean run all
 
 all: main
 
@@ -18,7 +18,6 @@ $(SIMLIB_DIR)/simlib.so:
 	@echo "Building simlib.so..."
 	$(MAKE) -C simlib install
 
-.PHONY: clean run all
 
 clean:
 	rm -rf main
