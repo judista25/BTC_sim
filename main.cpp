@@ -181,7 +181,7 @@ void WinProcess::Behavior()
 int main()
 {
     long long endDate = 1732320000000;
-    long long startDate = endDate - ((DAY * 1000LL) * 365LL * 8LL);
+    long long startDate = endDate - ((DAY * 1000LL) * 365LL);
     std::cout << "Start date: " << startDate << std::endl;
     Init(0, (((endDate - startDate) / 1000)) / scale);
 
