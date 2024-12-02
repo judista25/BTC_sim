@@ -6,9 +6,12 @@ SIMLIB_DEPEND3D=$(SIMLIB_DEPEND) $(SIMLIB_DIR)/simlib3D.h
 
 
 CXXFLAGS += -I$(SIMLIB_DIR)
+
+# dependencies:
+
 all: main
 
-main: main main.cpp main.hpp $(SIMLIB_DEPEND)
+main: main.cpp main.hpp $(SIMLIB_DEPEND)
 	$(CXX) $(CXXFLAGS) -o main main.cpp $(SIMLIB_DIR)/simlib.so -lm -Wall -pedantic
 
 $(SIMLIB_DIR)/simlib.so:
@@ -16,7 +19,6 @@ $(SIMLIB_DIR)/simlib.so:
 	$(MAKE) -C simlib install
 
 .PHONY: clean run all
-
 
 clean:
 	rm -rf main
