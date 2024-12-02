@@ -15,7 +15,7 @@ all: main
 	make -C .
 
 
-main: main.cpp main.hpp $(SIMLIB_DEPEND)
+main: main.cpp main.hpp 
 	$(CXX) $(CXXFLAGS) -o main main.cpp $(SIMLIB_DIR)/simlib.so -lm -Wall -pedantic
 
 # $(SIMLIB_DIR)/simlib.so:
