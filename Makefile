@@ -11,15 +11,13 @@ CXXFLAGS += -I$(SIMLIB_DIR)
 
 
 all: main
-	make -C simlib install
-	make -C .
 
-
-main: main.cpp main.hpp 
+main: main.cpp main.hpp $(SIMLIB_DEPEND)
 	$(CXX) $(CXXFLAGS) -o main main.cpp $(SIMLIB_DIR)/simlib.so -lm -Wall -pedantic
 
-# $(SIMLIB_DIR)/simlib.so:
-# 	@echo "Building simlib.so..."
+$(SIMLIB_DIR)/simlib.so:
+	@echo "Building simlib.so..."
+	make -C simlib install
 	
 
 clean:
