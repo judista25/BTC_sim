@@ -10,15 +10,17 @@ CXXFLAGS += -I$(SIMLIB_DIR)
 .PHONY: clean run all
 
 
+all: main
+	make -C simlib install
+	make -C .
 
-main: main main.cpp main.hpp $(SIMLIB_DEPEND)
+
+main: main.cpp main.hpp $(SIMLIB_DEPEND)
 	$(CXX) $(CXXFLAGS) -o main main.cpp $(SIMLIB_DIR)/simlib.so -lm -Wall -pedantic
 
-$(SIMLIB_DIR)/simlib.so:
-	@echo "Building simlib.so..."
-	$(MAKE) -C simlib install
-
-all: main
+# $(SIMLIB_DIR)/simlib.so:
+# 	@echo "Building simlib.so..."
+	
 
 clean:
 	rm -rf main
