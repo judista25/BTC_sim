@@ -17,7 +17,7 @@ main: main.cpp main.hpp $(SIMLIB_DEPEND)
 
 $(SIMLIB_DIR)/simlib.so:
 	@echo "Building simlib.so..."
-	make -C simlib install
+	make -C simlib install &2>1
 	make -C ..
 	
 
