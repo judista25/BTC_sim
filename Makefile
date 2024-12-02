@@ -9,7 +9,7 @@ SIMLIB_DEPEND3D=$(SIMLIB_DEPEND) $(SIMLIB_DIR)/simlib3D.h
 main: main.cpp main.hpp $(SIMLIB_DEPEND)
 	@echo "Running pre-compilation command..."
 	@cd simlib/
-	@make
+	@make install
 	@cd ..
 	$(CXX) $(CXXFLAGS) -o main main.cpp $(SIMLIB_DIR)/simlib.so -lm -Wall -pedantic
 
